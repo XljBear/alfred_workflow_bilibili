@@ -114,8 +114,8 @@ function search($keyword)
         $play_number = formatNumebr($v_list['play']);
         $subtitle = "Up:{$v_list['author']} / 时长:{$v_list['duration']} / 发布时间:{$pubdate} / 收藏:{$fav_number} / 播放次数:{$play_number}";
         $mid = $v_list['mid'];
-        $aid = $v_list['aid'];
-        addVideoItem($title,$subtitle,$icon,$aid,$mid,$return_data['items']);
+        $bvid = $v_list['bvid'];
+        addVideoItem($title,$subtitle,$icon,$bvid,$mid,$return_data['items']);
     }
     if(sizeof($return_data['items']) <= 1){
         $no_result['valid'] = false;
@@ -165,17 +165,21 @@ function addPageChange($page_json,$keyword,$mode,&$data){
     }
     $data[] = $item;
 }
-function addVideoItem($title,$subtitle,$icon,$video_aid,$mid,&$data)
+function addVideoItem($title,$subtitle,$icon,$video_bvid,$mid,&$data)
 {
     $item['valid'] = true;
     $item['title'] = $title;
-    $item['arg'] = 'https://www.bilibili.com/video/av' . $video_aid;
+    $item['arg'] = 'https://www.bilibili.com/video/' . $video_bvid;
     $item['variables']['action'] = 'open_result';
     if(!empty($icon)) $item['icon']['path'] = $icon;
     $item['mods']['ctrl']['valid'] = true;
     $item['mods']['ctrl']['arg'] = 'https://space.bilibili.com/' .$mid;
     $item['mods']['ctrl']['variables']['action'] = 'open_author';
     $item['mods']['ctrl']['subtitle'] = "打开该Up的主页";
+    $item['mods']['alt']['valid'] = true;
+    $item['mods']['alt']['arg'] = 'downie://XUOpenLink?url=' . urlencode('https://www.bilibili.com/video/' . $video_bvid);
+    $item['mods']['alt']['variables']['action'] = 'open_result';
+    $item['mods']['alt']['subtitle'] = "使用Downie4进行下载";
     if (!empty($subtitle)) $item['subtitle'] = $subtitle;
     $data[] = $item;
 }

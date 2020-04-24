@@ -4,6 +4,8 @@
 <dict>
 	<key>bundleid</key>
 	<string>tool.xljbearsoft.bilibili</string>
+	<key>category</key>
+	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>104EC6D4-FA11-49CD-8D4B-5184C17E440A</key>
@@ -767,7 +769,7 @@ By : XljBearSoft</string>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>0.0.1</string>
+	<string>0.0.2</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>
