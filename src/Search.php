@@ -84,6 +84,7 @@ function search($keyword)
             }
         }
     }
+    $need_download_pic = [];
     foreach ($user_list as $u_list){
         $title = "【Up主:{$u_list['uname']} [Lv:{$u_list['level']}]】";
         if($u_list['is_live']){
@@ -94,7 +95,7 @@ function search($keyword)
         if(strpos($mode,'no_pic')>1){
             $icon = '';
         }else{
-            download('https:' . $u_list['upic'],$pic_path);
+            $need_download_pic[] = 'https:' . $u_list['upic'];
             $icon = $pic_path . pathinfo($u_list['upic'], PATHINFO_BASENAME);
         }
         $roomid = $u_list['room_id'];
@@ -105,7 +106,7 @@ function search($keyword)
         if(strpos($mode,'no_pic')>1){
             $icon = '';
         }else{
-            download('https:' . $v_list['pic'],$pic_path);
+            $need_download_pic[] = 'https:' . $v_list['pic'];
             $icon = $pic_path . pathinfo($v_list['pic'], PATHINFO_BASENAME);
         }
         $title = strip_tags($v_list['title']);
@@ -124,6 +125,9 @@ function search($keyword)
         exit();
     }
     addPageChange($video_js_info['flow']['getMixinFlowList-jump-keyword-'.$keyword],$keyword,$mode,$return_data['items']);
+    if(sizeof($need_download_pic)){
+        download($need_download_pic,$pic_path);
+    }
     return json_encode($return_data);
 }
 function addPageChange($page_json,$keyword,$mode,&$data){
@@ -208,19 +212,35 @@ function formatNumebr($number){
     }
     return $number_string;
 }
-function download($url, $path)
-{
-    if(!is_dir($path)){
-        @mkdir($path);
+function download($urls,$path){
+    $chs = curl_multi_init();
+    $url_maps = [];
+    foreach ($urls as $url){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_multi_add_handle($chs, $ch);
+        $url_maps[$ch] = $url;
     }
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-    $file = curl_exec($ch);
-    curl_close($ch);
-    $filename = pathinfo($url, PATHINFO_BASENAME);
-    $resource = fopen($path . $filename, 'a');
-    fwrite($resource, $file);
-    fclose($resource);
+
+    do {
+        if (($status = curl_multi_exec($chs, $active)) != CURLM_CALL_MULTI_PERFORM) {
+            if ($status != CURLM_OK) {
+                break;
+            }
+            while ($done = curl_multi_info_read($chs)) {
+                $return_data = curl_multi_getcontent($done["handle"]);
+                $filename = pathinfo($url_maps[$done['handle']], PATHINFO_BASENAME);
+                $resource = fopen($path . $filename, 'a');
+                fwrite($resource, $return_data);
+                curl_multi_remove_handle($chs, $done['handle']);
+                curl_close($done['handle']);
+                if ($active > 0) {
+                    curl_multi_select($chs, 0.5);
+                }
+            }
+        }
+    } while ($active > 0);
+    curl_multi_close($chs);
 }

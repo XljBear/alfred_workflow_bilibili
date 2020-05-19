@@ -29,11 +29,11 @@ function addItem($title, $subtitle, &$data)
     $item['valid'] = true;
     $item['title'] = $title;
     $item['arg'] = $title;
-    $item['variables']['action'] = 'search_no_pic';
+    $item['variables']['action'] = 'search';
     $item['mods']['ctrl']['valid'] = true;
     $item['mods']['ctrl']['arg'] = $title;
-    $item['mods']['ctrl']['variables']['action'] = 'search';
-    $item['mods']['ctrl']['subtitle'] = "载入缩略图模式进行搜索";
+    $item['mods']['ctrl']['variables']['action'] = 'search_no_pic';
+    $item['mods']['ctrl']['subtitle'] = "无缩略图模式进行搜索";
     $item['mods']['alt']['valid'] = true;
     $item['mods']['alt']['arg'] = 'https://search.bilibili.com/all?keyword=' . urlencode($title);
     $item['mods']['alt']['variables']['action'] = 'open_search';
